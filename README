@@ -1,0 +1,68 @@
+FinTrack is a program that helps you track your personal finances. You import files of transactions that you download from your bank and the program keeps track of how much you're spending in each category. The plan is to add the ability to forecast future spending based on historical recurring transactions and general trends.
+
+fintrack import : import transactions
+fintrack log    : show a list of the transactions imported to date
+fintrack train  : give fintrack some examples of categorised transactions, so it can automatically categorise in future
+fintrack report : show a summary report of expenses by category
+fintrack amend  : change how a transaction is recorded or categorised
+
+Example:
+
+fintrack import aug2011.csv 
+
+The example above tells fintrack import the transactions in the file aug2011.csv, and tells it that the transactions are from the user's current account. If you import the same transaction twice fintrack detects this and ignores the duplicates. 
+The arguments --datadir=./.fintrack/ --account=current can be omitted, they will default to the values shown.
+
+fintrack import -i aug2011.csv 
+runs the import in interactive mode, so that the user can update the transaction categories if required.
+
+fintrack config
+allows the user to update fintrack configuration
+
+fintrack amend 342
+
+Amend transaction 342, lets the user change categories, descriptions, or split the transaction into sub transactions with their own amounts and categories.
+
+fintrack account --list
+
+lists all the accounts in the system
+
+fintrack account --add <name>
+
+add a new account
+
+fintrack log [--from=<date> [--to=<date>]] [--period=<period>]
+
+shows all transactions between dates shown, alternative period can be specified in natural language, last month, last six months, etc.
+
+fintrack report [--from=<date> [--to=<date>]] [--period=<period>]
+
+prints a categorised report for the requested period. 
+
+fintrack project 
+
+prints a report showing the projected transactions into the future, based on recurring regular transactions that it has identified, and general trends by category.
+
+-----------------------------------------------------------
+Technical internals
+
+Fintrack imports transaction data into a database in ~/.fintrack/transactions.csv .
+
+Each transaction is first checked to see if it has already been imported. The schema of the table is:
+
+TransImports
+--------------
+transid
+account
+date
+description
+amount
+category
+
+If an attempt is made to import a transaction with the same date, description and amount, it is silently dropped. The expected usage is that the user downloads the past 1 month of transactions every week, so it's important we handle duplicates properly and assume they will be the default (i.e. it's not an error, or something the user needs to be notified of).
+
+To categorise transactions, query the database for existing transactions with the same description as the one to be categorised. If there are multiple such transactions, with different categories, try to match one with the same amount. Otherwise, use the most recent transaction with identical description. If no such transaction exists, use CRM to categorise. If crm is not available on the system, use inbuilt naive bayes classifier with muti-word features, and/or possibly Levenshtein, from the edit-distance library, though I don't think this will be very effective.
+
+Is there any reason this should be sqlite rather than a flat csv file? Doing it as a flat file means we have fewer dependencies, and the data store is human readable...
+
+

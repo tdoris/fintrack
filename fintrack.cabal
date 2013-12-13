@@ -1,0 +1,39 @@
+Name:                FinTrack
+Version:             0.1
+Synopsis:            Tag account transaction categories and analyse transactions
+License:             AllRightsReserved
+License-file:        LICENSE
+Author:              Tom Doris
+Maintainer:          tomdoris@gmail.com
+Category:            Finance
+Build-type:          Simple
+
+-- Constraint on the version of Cabal needed to build this package.
+Cabal-version:       >=1.2
+
+
+Executable fintrack
+  -- .hs or .lhs file containing the Main module.
+  Main-is: FinTrack.hs       
+  other-modules: 
+    FinTrack.Transaction
+    FinTrack.Trainer
+    FinTrack.Categorise
+    FinTrack.Date
+    Crm.Crm
+  
+  -- Packages needed in order to build this package.
+  -- Build-depends:    
+  Build-depends:     base >= 3.0 && < 5,
+                     network >= 2.2,
+                     split >= 0.1,
+                     directory >= 1.0,
+                     HSH >= 2.0,
+                     cmdargs >= 0.6,
+                     pretty >= 1.0,
+                     filepath >= 1.0,
+                     bytestring >= 0.8,
+                     bytestring-csv >= 0.1,
+                     bytestring-lexing >= 0.2
+
+  ghc-options: -O2 -Wall
